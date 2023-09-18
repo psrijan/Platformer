@@ -1,0 +1,8 @@
+Features:
+-----------------
+1. Add Player Animation
+2. Add Player Jump Motion
+3. Adding Floor Detection
+4. Add Collission
+5. Adding Shooting Action
+6. Adding
