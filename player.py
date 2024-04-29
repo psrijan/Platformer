@@ -51,6 +51,7 @@ class Soldier(pygame.sprite.Sprite):
     def draw(self, screen):
         self.img = pygame.image.load(
             'assets/player/{}/{}'.format(self.action, self.animationFileMap[self.action][self.index]))
+        print("Action : {} Index: {} ".format(self.action, self.index))
         self.img = pygame.transform.scale(pygame.transform.flip(self.img, self.flip, False),
                                           (int(self.img.get_width() * self.scale),
                                            int(self.img.get_height() * self.scale)))

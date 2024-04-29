@@ -17,8 +17,6 @@ move_right = False
 IDLE = 'idle'
 RUN = 'run'
 
-
-
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -28,8 +26,10 @@ while running:
             if event.key == pygame.K_a:
                 print('A clicked')
                 move_left = True
+                move_right = False
             elif event.key == pygame.K_d:
                 print('D clicked')
+                move_left = False
                 move_right = True
 
         if event.type == pygame.KEYUP:
