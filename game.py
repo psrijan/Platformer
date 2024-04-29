@@ -15,7 +15,7 @@ move_left = False
 move_right = False
 
 IDLE = 'idle'
-RUN  = 'run'
+RUN = 'run'
 
 
 
@@ -48,7 +48,6 @@ while running:
 
         screen.fill((0, 0, 0))
         player.draw(screen)
-        print('event loop running')
         # player.move(move_left, move_right, 5)
 
         # pygame.draw.rect(screen, pygame.Color(100,100,100, 100), pygame.rect.Rect(100, 100, 100, 100))

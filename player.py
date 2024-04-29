@@ -18,6 +18,7 @@ class Soldier(pygame.sprite.Sprite):
         self.alive = True
         self.rect = None
         self.img = None
+        self.flip = False
         imgTags = [AIM, DEATH, IDLE, RUN, SHOOT]
         self.animationFileMap = {}
         self.update_time = pygame.time.get_ticks()
@@ -25,7 +26,7 @@ class Soldier(pygame.sprite.Sprite):
             fileList = os.listdir(f'assets/player/{curTag}')
             self.animationFileMap[curTag] = fileList
 
-        self.state = IDLE
+        self.action = IDLE
         self.direction = IDLE
         self.jump = False
         self.scale = scale
@@ -36,18 +37,24 @@ class Soldier(pygame.sprite.Sprite):
 
     def idle(self):
         # initialize state to idle if it's not the case and index img to 0
-        if self.state not in IDLE:
-            self.state = IDLE
+        if self.action not in IDLE:
+            self.action = IDLE
             self.index = 0
-        print('State: {} Index: {} Total Size: {} '.format(self.state, self.index, len(self.animationFileMap[self.state])) )
+        print('State: {} Index: {} Total Size: {} '.format(self.action, self.index, len(self.animationFileMap[self.action])))
         self.img = pygame.image.load(
-            'assets/player/{}/{}'.format(self.state, self.animationFileMap[self.state][self.index]))
+            'assets/player/{}/{}'.format(self.action, self.animationFileMap[self.action][self.index]))
         self.img = pygame.transform.scale(self.img, (
         int(self.img.get_width() * self.scale), int(self.img.get_height() * self.scale)))
-        self.index = (self.index + 1) % len(self.animationFileMap[self.state])
+        self.index = (self.index + 1) % len(self.animationFileMap[self.action])
         print('img index: {}'.format(self.index))
 
     def draw(self, screen):
+        self.img = pygame.image.load(
+            'assets/player/{}/{}'.format(self.action, self.animationFileMap[self.action][self.index]))
+        self.img = pygame.transform.scale(pygame.transform.flip(self.img, self.flip, False),
+                                          (int(self.img.get_width() * self.scale),
+                                           int(self.img.get_height() * self.scale)))
+        self.index = (self.index + 1) % len(self.animationFileMap[self.action])
         self.rect = self.img.get_rect()
         self.rect.center = (self.x, self.y)
         screen.blit(self.img, self.rect)
@@ -57,40 +64,13 @@ class Soldier(pygame.sprite.Sprite):
         dy = 0
         if move_left:
             dx = -speed
-            if self.direction not in 'LEFT':
-                self.state = RUN
-                self.direction = 'LEFT'
-                self.index = 0
-            self.img = pygame.image.load('assets/player/{}/{}'.format(self.state, self.animationFileMap[self.state][self.index]))
-            self.img = pygame.transform.scale(pygame.transform.flip(self.img, True, False),
-                                              (int(self.img.get_width() * self.scale),
-                                               int(self.img.get_height() * self.scale)))
-            self.index = (self.index + 1) % len(self.animationFileMap[RUN])
-
+            self.flip = True
+            self.direction = -1
         elif move_right:
             dx = speed
-            if self.direction not in 'RIGHT':
-                self.state = RUN
-                self.direction = 'RIGHT'
-                self.index = 0
-            self.img = pygame.image.load('assets/player/{}/{}'.format(self.state, self.animationFileMap[self.state][self.index]))
-            self.img = pygame.transform.scale(self.img, (int(self.img.get_width() * self.scale),
-                                               int(self.img.get_height() * self.scale)))
-            # self.img = pygame.transform.flip(self.img, 1, 0)
-            self.index = (self.index + 1) % len(self.animationFileMap[RUN])
+            self.flip = False
+            self.direction = 1
 
-        elif not move_left and not move_right:
-            if self.direction not in 'IDLE':
-                self.direction = IDLE
-                self.index = 0
-                self.state = IDLE # start and direction same here
-
-            self.idle()
-
-        if self.jump != isJump:
-            self.jump = isJump
-
-        print('change in x: ')
         self.x += dx
         self.y += dy
 
@@ -102,9 +82,9 @@ class Soldier(pygame.sprite.Sprite):
             self.update_time = pygame.time.get_ticks()
 
 
-    def update_player_action(self, action):
-        if self.state != action:
-            self.state = action
+    def update_player_action(self, cur_action):
+        if self.action != cur_action:
+            self.action = cur_action
             self.index = 0
             self.update_time = pygame.time.get_ticks()
 
