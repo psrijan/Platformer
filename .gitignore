@@ -2,3 +2,4 @@
 .DS_Store
 bomberenv/
 __pycache__/
+env/

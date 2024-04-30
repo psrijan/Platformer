@@ -1,10 +1,19 @@
 TODO: Start Date Aug 12 - Oct 12
 
+# Build a bomberman game
 
 MOVEMENT []
-1. Player Left []
-2. Player Right []
-3. Player Jump []
+1. idle movement [DONE]
+1. Player Left [DONE]
+2. Player Right [DONE]
+3. Player Jump [DONE]
+4. Player Collission []
+4. Player Jump with left []
+5. Player Jump with Right []
+8. Add Collission []
+9. Add Enemy []
+
+
 Player Accessories []
 1. Bomb []
 2. Shoot []
