@@ -22,12 +22,18 @@ class Soldier(pygame.sprite.Sprite):
         self.rect = None
         self.img = None
         self.flip = False
+        self.aim_major_loop = False
         imgTags = [AIM, DEATH, IDLE, RUN, SHOOT]
         self.animationFileMap = {}
         self.update_time = pygame.time.get_ticks()
         for curTag in imgTags:
             fileList = os.listdir(f'assets/player/{curTag}')
-            self.animationFileMap[curTag] = fileList
+            self.animationFileMap[curTag] = sorted(fileList)
+
+            # if curTag == 'aim':
+            #     print(sorted(fileList))
+            #     print(len(fileList))
+            #     exit(0)
 
         self.action = IDLE
         self.jump = False
@@ -37,135 +43,7 @@ class Soldier(pygame.sprite.Sprite):
         self.y = y
         self.idle()
 
-    def idle(self):# encoding: utf-8
-# module pygame.transform
-# from /home/srijan/Documents/code/Platformer/env/lib/python3.10/site-packages/pygame/transform.cpython-310-x86_64-linux-gnu.so
-# by generator 1.147
-""" pygame module to transform surfaces """
-# no imports
-
-# functions
-
-def average_color(surface, rect=None, consider_alpha=False): # real signature unknown; restored from __doc__
-    """
-    average_color(surface, rect=None, consider_alpha=False) -> Color
-    finds the average color of a surface
-    """
-    pass
-
-def average_surfaces(surfaces, dest_surface=None, palette_colors=1): # real signature unknown; restored from __doc__
-    """
-    average_surfaces(surfaces, dest_surface=None, palette_colors=1) -> Surface
-    find the average surface from many surfaces.
-    """
-    pass
-
-def chop(surface, rect): # real signature unknown; restored from __doc__
-    """
-    chop(surface, rect) -> Surface
-    gets a copy of an image with an interior area removed
-    """
-    pass
-
-def flip(surface, flip_x, flip_y): # real signature unknown; restored from __doc__
-    """
-    flip(surface, flip_x, flip_y) -> Surface
-    flip vertically and horizontally
-    """
-    pass
-
-def get_smoothscale_backend(): # real signature unknown; restored from __doc__
-    """
-    get_smoothscale_backend() -> string
-    return smoothscale filter version in use: 'GENERIC', 'MMX', or 'SSE'
-    """
-    return ""
-
-def grayscale(surface, dest_surface=None): # real signature unknown; restored from __doc__
-    """
-    grayscale(surface, dest_surface=None) -> Surface
-    grayscale a surface
-    """
-    pass
-
-def laplacian(*args, **kwargs): # real signature unknown
-    """
-    threshold(dest_surface, surface, search_color, threshold=(0,0,0,0), set_color=(0,0,0,0), set_behavior=1, search_surf=None, inverse_set=False) -> num_threshold_pixels
-    finds which, and how many pixels in a surface are within a threshold of a 'search_color' or a 'search_surf'.
-    """
-    pass
-
-def rotate(surface, angle): # real signature unknown; restored from __doc__
-    """
-    rotate(surface, angle) -> Surface
-    rotate an image
-    """
-    pass
-
-def rotozoom(surface, angle, scale): # real signature unknown; restored from __doc__
-    """
-    rotozoom(surface, angle, scale) -> Surface
-    filtered scale and rotation
-    """
-    pass
-
-def scale(surface, size, dest_surface=None): # real signature unknown; restored from __doc__
-    """
-    scale(surface, size, dest_surface=None) -> Surface
-    resize to new resolution
-    """
-    pass
-
-def scale2x(surface, dest_surface=None): # real signature unknown; restored from __doc__
-    """
-    scale2x(surface, dest_surface=None) -> Surface
-    specialized image doubler
-    """
-    pass
-
-def scale_by(surface, factor, dest_surface=None): # real signature unknown; restored from __doc__
-    """
-    scale_by(surface, factor, dest_surface=None) -> Surface
-    resize to new resolution, using scalar(s)
-    """
-    pass
-
-def set_smoothscale_backend(backend): # real signature unknown; restored from __doc__
-    """
-    set_smoothscale_backend(backend) -> None
-    set smoothscale filter version to one of: 'GENERIC', 'MMX', or 'SSE'
-    """
-    pass
-
-def smoothscale(surface, size, dest_surface=None): # real signature unknown; restored from __doc__
-    """
-    smoothscale(surface, size, dest_surface=None) -> Surface
-    scale a surface to an arbitrary size smoothly
-    """
-    pass
-
-def smoothscale_by(surface, factor, dest_surface=None): # real signature unknown; restored from __doc__
-    """
-    smoothscale_by(surface, factor, dest_surface=None) -> Surface
-    resize to new resolution, using scalar(s)
-    """
-    pass
-
-def threshold(dest_surface, surface, search_color, threshold=(0,0,0,0), set_color=(0,0,0,0), set_behavior=1, search_surf=None, inverse_set=False): # real signature unknown; restored from __doc__
-    """
-    threshold(dest_surface, surface, search_color, threshold=(0,0,0,0), set_color=(0,0,0,0), set_behavior=1, search_surf=None, inverse_set=False) -> num_threshold_pixels
-    finds which, and how many pixels in a surface are within a threshold of a 'search_color' or a 'search_surf'.
-    """
-    pass
-
-# no classes
-# variables with complex values
-
-__loader__ = None # (!) real value is '<_frozen_importlib_external.ExtensionFileLoader object at 0x7d24fff2a740>'
-
-__spec__ = None # (!) real value is "ModuleSpec(name='pygame.transform', loader=<_frozen_importlib_external.ExtensionFileLoader object at 0x7d24fff2a740>, origin='/home/srijan/Documents/code/Platformer/env/lib/python3.10/site-packages/pygame/transform.cpython-310-x86_64-linux-gnu.so')"
-
-
+    def idle(self):
         # initialize state to idle if it's not the case and index img to 0
         if self.action not in IDLE:
             self.action = IDLE
@@ -180,9 +58,21 @@ __spec__ = None # (!) real value is "ModuleSpec(name='pygame.transform', loader=
         print('img index: {}'.format(self.index))
 
     def draw(self, screen):
+
+        # AIM needs to iterate through two different set of image set for animation
+        if self.action == 'aim':
+            print('sepcific action event')
+            if self.aim_major_loop and self.index == 0:
+                self.index += 3
+                self.index = self.index % len(self.animationFileMap[self.action])
+            elif self.index > 3 and not self.aim_major_loop:
+                self.aim_major_loop = True
+
+        print('ACTION: {} -- MAJOR LOOP: {} -- INDEX: {} size: {}'.format(self.action, str(self.aim_major_loop), self.index,
+                                                                          len(self.animationFileMap[self.action])))
+
         self.img = pygame.image.load(
             'assets/player/{}/{}'.format(self.action, self.animationFileMap[self.action][self.index]))
-        print("Action : {} Index: {} ".format(self.action, self.index))
         self.img = pygame.transform.scale(pygame.transform.flip(self.img, self.flip, False),
                                           (int(self.img.get_width() * self.scale),
                                            int(self.img.get_height() * self.scale)))
@@ -227,4 +117,6 @@ __spec__ = None # (!) real value is "ModuleSpec(name='pygame.transform', loader=
         if self.action != cur_action:
             self.action = cur_action
             self.index = 0
+            # aim has two set of animation, a start animation and second
+            self.aim_major_loop = False
             self.update_time = pygame.time.get_ticks()

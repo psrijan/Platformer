@@ -14,9 +14,13 @@ player = Soldier(300, 300, .25)
 move_left = False
 move_right = False
 jump = False
+shoot = False
+aim = False
 
 IDLE = 'idle'
 RUN = 'run'
+SHOOT = 'shoot'
+AIM = 'aim'
 
 while GAME_LOOP_RUNNING:
     print('running')
@@ -36,6 +40,14 @@ while GAME_LOOP_RUNNING:
                 print('w clicked')
                 jump = True
 
+            if event.key == pygame.K_LSHIFT:
+                print('aiming - LSHIFT pressed')
+                aim = True
+            elif event.key == pygame.K_SPACE:
+                print('shoot')
+                shoot = True
+                print('space pressed shooting now')
+
         if event.type == pygame.KEYUP:
             print('key up event triggered')
             if event.key == pygame.K_a:
@@ -51,10 +63,22 @@ while GAME_LOOP_RUNNING:
                 jump = False
                 print('w released')
 
+            if event.key == pygame.K_LSHIFT:
+                aim = False
+                print('aiming removed')
+            if event.key == pygame.K_SPACE:
+                shoot = False
+                print('space released not shooting')
+
+
         print(f'move_left: {move_left} -- move_right: {move_right}')
 
         if move_left or move_right:
             player.update_player_action(RUN)
+        elif shoot:
+            player.update_player_action(SHOOT)
+        elif aim:
+            player.update_player_action(AIM)
         else:
             player.update_player_action(IDLE)
 
