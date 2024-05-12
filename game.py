@@ -1,6 +1,7 @@
 import pygame
 from player import Soldier
 import time
+from enemy import Enemy
 
 PLAYER_SPEED = 15
 
@@ -10,6 +11,8 @@ clock = pygame.time.Clock()
 GAME_LOOP_RUNNING = True
 
 player = Soldier(300, 300, .25)
+enemy = Enemy(300, 400, 1, 'FLYING')
+enemy1 = Enemy(500, 300, 1)
 
 move_left = False
 move_right = False
@@ -83,9 +86,13 @@ while GAME_LOOP_RUNNING:
             player.update_player_action(IDLE)
 
     player.move(move_left, move_right, jump, PLAYER_SPEED)
+    enemy.move()
+    enemy1.move()
 
     screen.fill((0, 0, 0))
     player.draw(screen)
+    enemy.draw(screen)
+    enemy1.draw(screen)
 
     # player.move(move_left, move_right, 5)
 

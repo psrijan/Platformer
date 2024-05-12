@@ -107,6 +107,9 @@ class Soldier(pygame.sprite.Sprite):
         self.x += dx
         self.y -= dy
 
+    def detect_collission(self):
+        pass
+
     def update_animation(self):
         ANIMATION_COOLDOWN = 100
         if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:

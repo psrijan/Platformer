@@ -1,8 +1,10 @@
 TODO: Start Date Aug 12 - Oct 12
 
 # Build a bomberman game
+PLAYER BASIC:
+-------------------
 
-MOVEMENT []
+MOVEMENT [DONE]
 1. idle movement [DONE]
 1. Player Left [DONE]
 2. Player Right [DONE]
@@ -11,12 +13,23 @@ MOVEMENT []
 5. Player Action Aim [DONE]
     - aim is challenging because it requires that you first run the first two image frame, and [DONE]
     - then repeat the last 4 [DONE]
+6. sound effects for the player actions []
 
 4. Player Collission []
+    - create obstacle in the map []
+    - create a player obstacle logic []
+    -
 4. Player Jump with left []
 5. Player Jump with Right []
 8. Add Collission []
 9. Add Enemy []
+
+ENEMY
+----------------------
+1. Find various Enemy assets in itch.io [DONE]
+2. Create Basic Enemy classes [DONE]
+3. Create enemy image animation using the same image [DONE]
+
 
 
 Player Accessories []
