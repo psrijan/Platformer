@@ -13,16 +13,17 @@ MOVEMENT [DONE]
 5. Player Action Aim [DONE]
     - aim is challenging because it requires that you first run the first two image frame, and [DONE]
     - then repeat the last 4 [DONE]
-6. sound effects for the player actions []
 
-4. Player Collission []
-    - create obstacle in the map []
-    - create a player obstacle logic []
-    -
+4. Player Collission [DONE]
+    - create obstacle in the map [DONE]
+    - create a player obstacle logic [DONE]
+
 4. Player Jump with left []
 5. Player Jump with Right []
-8. Add Collission []
-9. Add Enemy []
+8. Add Collission [DONE]
+    - it is able to identify collision
+
+9. Add Enemy [DONE]
 
 ENEMY
 ----------------------
@@ -46,6 +47,7 @@ Player Accessories []
 11. Installation Packs for various OSs []
 12. Github Distribution and versioning []
 
+6. sound effects for the player actions []
 
 
 RESOURCES []

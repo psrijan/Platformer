@@ -21,7 +21,8 @@ static_data = {
         'IMG_COUNT': 6,
         'IMAGE_SIZE': [(81, 71), (81, 71), (81, 71), (81, 71), (81, 71), (81, 71)],
         'IMAGE_COORD': [(0, 0), (81, 0), (162, 0), (244, 0), (325, 0), (406, 0)]
-    },'ATTACK': {
+    },
+    'ATTACK': {
         'IMG_COUNT': 8,
         'IMAGE_SIZE': [(81, 71), (81, 71), (81, 71), (81, 71), (81, 71), (81, 71),(81, 71),(81, 71)],
         'IMAGE_COORD': [(0, 0), (81, 0), (162, 0), (244, 0), (325, 0), (406, 0), (487, 0), (568, 0)]
@@ -30,8 +31,10 @@ static_data = {
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y, scale, cur_state='IDLE'):
+    def __init__(self, x, y, scale, cur_state='IDLE', health=100):
         pygame.sprite.Sprite.__init__(self)
+        self.update_time = pygame.time.get_ticks() # identifies when a given action is initiated
+        self.rect = None
         self.flip = True
         self.img = None
         self.x = x
@@ -40,6 +43,10 @@ class Enemy(pygame.sprite.Sprite):
         self.CENTER = self.x  # moves around across the initial value of center
         self.scale = scale
         self.img_map = {}
+
+        self.alive = True
+        self.health = health
+        self.max_heath = health
 
         self.cur_state = cur_state
         self.state = ['ATTACK', 'DEATH', 'FLYING', 'HURT', 'IDLE']
@@ -56,18 +63,38 @@ class Enemy(pygame.sprite.Sprite):
 
     def draw(self, screen):
         state_img_list = self.img_map[self.cur_state]
-        max_index = static_data[self.cur_state]['IMG_COUNT']
+        img_size_length = static_data[self.cur_state]['IMG_COUNT']
         img_size = static_data[self.cur_state]['IMAGE_SIZE'][self.index]
         img_coord = static_data[self.cur_state]['IMAGE_COORD'][self.index]
-        print(f'ENEMY - cur_index {self.index} max_index {max_index} img_size {img_size} img_coord {img_coord} ')
+        print(f'ENEMY - cur_index {self.index} max_index {img_size_length} img_size {img_size} img_coord {img_coord} ')
         self.img = clip(state_img_list, img_coord[0], img_coord[1],img_size[0], img_size[1])
         # self.img = state_img_list
         self.img = pygame.transform.scale(pygame.transform.flip(self.img, self.flip, False),
                                           (self.img.get_width() * self.scale, self.img.get_height() * self.scale))
-        img_rect = self.img.get_rect()
-        img_rect.center = (self.x, self.y)
-        screen.blit(self.img, img_rect)
-        self.index = (self.index + 1) % max_index
+        self.rect = self.img.get_rect()
+        self.rect.center = (self.x, self.y)
+        screen.blit(self.img, self.rect)
+        if self.cur_state == 'DEATH' and self.index >= img_size_length - 1:
+            self.kill()
+        else:
+            self.index = (self.index + 1) % img_size_length
+
+    def check_alive(self):
+        if self.health <= 0:
+            self.health = 0
+            self.alive = False
+        print(f"current enemy health: {self.health}")
+
+    def update(self):
+        self.check_alive()
+        if not self.alive:
+            self.update_action('DEATH')
+
+    def update_action(self, action_name):
+        if self.cur_state != action_name:
+            self.cur_state = action_name
+            self.index = 0
+            self.update_time = pygame.time.get_ticks()
 
     def detect_collision(self):
         pass
