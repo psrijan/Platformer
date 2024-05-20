@@ -14,3 +14,10 @@ def clip2(surface, x, y, x_size, y_size): #Get a part of the image
     handle_surface.set_clip(clipRect) #Clip or you can call cropped
     image = surface.subsurface(handle_surface.get_clip()) #Get subsurface
     return image.copy() #Return
+
+
+def renderFont():
+    pass
+    # ft = pygame.font.SysFont('Comic Sans MS', 30)
+    # font_surface = ft.render("hello world", False, (200, 200, 200))
+    # screen.blit(font_surface, (10, 10))

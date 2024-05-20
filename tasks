@@ -35,7 +35,7 @@ ENEMY
 
 Player Accessories []
 1. Bomb []
-2. Shoot []
+2. Shoot [DONE]
 3. Inventory []
 4. Sensing Player Collission []
 5. Player Health []

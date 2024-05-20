@@ -16,10 +16,12 @@ PLAYER_SPEED = 5
 class Soldier(pygame.sprite.Sprite):
     dy = 0
 
-    def __init__(self, x, y, scale, speed=10, ammo=10, health=100):
+    def __init__(self, x, y, scale, speed=10, ammo=10, health=90, granade=5):
         pygame.sprite.Sprite.__init__(self)  # i don't quite understand this
         self.shoot_time = 0  # Putting a 50 millisecond shoot cool downt time
+        self.grande_throw_time = 0
         self.SHOOT_COOLDOWN_TIME = 300
+        self.GRANDE_COOLDOWN_TIME = 700
         self.isJumpActivated = False
         self.alive = True
         self.direction = 1  # initially player is looking at the right side
@@ -34,6 +36,9 @@ class Soldier(pygame.sprite.Sprite):
 
         self.ammo = ammo
         self.max_ammo = ammo
+
+        self.max_granade_count = granade
+        self.granade_count = granade
 
         self.health = health
         self.max_health = health
@@ -105,7 +110,19 @@ class Soldier(pygame.sprite.Sprite):
             self.ammo -= 1
             self.shoot_time = pygame.time.get_ticks()
         else:
-            print("player ammo empty")
+            print("player ammo empty or shoot time not exceeded ")
+
+    def throwGranade(self, granade_group: Group):
+        cur_ticks = pygame.time.get_ticks()
+        if cur_ticks - self.grande_throw_time > self.GRANDE_COOLDOWN_TIME and self.granade_count > 0:
+            print('throwing grande')
+            granade = Granade(self.rect.centerx + (self.rect.width * .6 * self.direction),
+                              self.rect.centery, self.direction)
+            granade_group.add(granade)
+            self.granade_count -= 1
+            self.grande_throw_time = pygame.time.get_ticks()
+        else:
+            print("player granade box empty or throw time not exceeded")
 
     def update(self):
         self.update_animation()
@@ -188,8 +205,9 @@ class Bullet(pygame.sprite.Sprite):
         self.player = player
         self.enemy = enemy
         self.bullet_group = bullet_group
+
+
     def update(self):
-        print("Update class is being called")
         self.rect.x += (self.speed * self.direction)
 
         # check if bullet goes out of screen
@@ -207,5 +225,67 @@ class Bullet(pygame.sprite.Sprite):
             if self.enemy.alive:
                 self.kill()
                 self.enemy.health -= 25
+
+
+class Granade(pygame.sprite.Sprite):
+    def __init__(self, x, y, direction):
+        pygame.sprite.Sprite.__init__(self)
+        self.state = ["EXPLODING", "FLYING"]
+        self.cur_state = "FLYING"
+        self.image = pygame.image.load("./assets/objects/missile.gif")
+        self.state_image = {}
+        items = os.listdir("./assets/PixelSimulations/Explosion4/")
+        print("ITEMS: " , items)
+        self.state_image["FLYING"] = [pygame.image.load("./assets/objects/missile.gif").convert()]
+        exploding_img_list = []
+        for imageItem in sorted(items):
+            img = pygame.image.load(f"./assets/PixelSimulations/Explosion4/{imageItem}").convert()
+            exploding_img_list.append(img)
+        self.state_image["EXPLODING"] = exploding_img_list
+        if direction == 1:
+            self.flipX = False
+        else:
+            self.flipX = True
+        self.image = pygame.transform.flip(self.image, self.flipX, False)
+        self.direction = direction
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.start_time = pygame.time.get_ticks()
+        self.gravity = 2
+        self.speed = 10
+        self.speedY = 2
+        self.gravity = .5
+        self.bobLeft = True
+        self.index = 0
+
+    def add_hit_strike(self, player, enemy, granade_group):
+        self.player = player
+        self.enemy = enemy
+        self.granade_group = granade_group
+
+    def update(self):
+        print("Update class is being called")
+        self.image = self.state_image[self.cur_state][self.index]
+        if self.cur_state == "FLYING":
+            self.rect.x += (self.speed * self.direction)
+            self.rect.y -= self.speedY
+        if self.speedY < 15:
+            self.speedY -= self.gravity
+        if self.bobLeft:
+            self.image = pygame.transform.rotate(self.image, -.2)
+        else:
+            self.image = pygame.transform.rotate(self.image, +.2)
+        self.bobLeft = not self.bobLeft
+
+        if pygame.time.get_ticks() - self.start_time >= 3000 and self.cur_state is not "EXPLODING":
+            print("bomb time elapsed")
+            self.cur_state = "EXPLODING"
+            self.index = 0
+
+        if self.cur_state == "EXPLODING":
+            if not self.index == len(self.state_image[self.cur_state]) - 1:
+                self.index = (self.index + 1) % len(self.state_image[self.cur_state])
+        else:
+            self.index = 0 # flying just use the first index
 
 
