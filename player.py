@@ -45,7 +45,13 @@ class Soldier(pygame.sprite.Sprite):
 
         for curTag in imgTags:
             fileList = os.listdir(f'assets/player/{curTag}')
-            self.animationFileMap[curTag] = sorted(fileList)
+            print(fileList)
+            loaded_files = []
+            for file_name in fileList:
+                print(f'./assets/player/{curTag}/{file_name}')
+                load_img = pygame.image.load(f'assets/player/{curTag}/{file_name}').convert_alpha()
+                loaded_files.append(load_img)
+                self.animationFileMap[curTag] = loaded_files
 
             # if curTag == 'aim':
             #     print(sorted(fileList))
@@ -67,11 +73,10 @@ class Soldier(pygame.sprite.Sprite):
             self.index = 0
         print('State: {} Index: {} Total Size: {} '.format(self.action, self.index,
                                                            len(self.animationFileMap[self.action])))
-        self.img = pygame.image.load(
-            'assets/player/{}/{}'.format(self.action, self.animationFileMap[self.action][self.index]))
+        self.img = self.animationFileMap[self.action][self.index]
         self.img = pygame.transform.scale(self.img, (
             int(self.img.get_width() * self.scale), int(self.img.get_height() * self.scale)))
-        self.index = (self.index + 1) % len(self.animationFileMap[self.action])
+        # self.index = (self.index + 1) % len(self.animationFileMap[self.action])
 
     def draw(self, screen):
 
@@ -87,8 +92,7 @@ class Soldier(pygame.sprite.Sprite):
                                                                           self.index,
                                                                           len(self.animationFileMap[self.action])))
 
-        self.img = pygame.image.load(
-            'assets/player/{}/{}'.format(self.action, self.animationFileMap[self.action][self.index]))
+        self.img = self.animationFileMap[self.action][self.index]
         self.img = pygame.transform.scale(pygame.transform.flip(self.img, self.flip, False),
                                           (int(self.img.get_width() * self.scale),
                                            int(self.img.get_height() * self.scale)))
@@ -124,7 +128,8 @@ class Soldier(pygame.sprite.Sprite):
         else:
             print("player granade box empty or throw time not exceeded")
 
-    def update(self):
+    def update(self, action):
+        self.update_player_action(action)
         self.update_animation()
 
     def move(self, move_left, move_right, isJump, speed):
@@ -166,9 +171,9 @@ class Soldier(pygame.sprite.Sprite):
                 self.y = 300
 
     def update_animation(self):
-        ANIMATION_COOLDOWN = 50
+        ANIMATION_COOLDOWN = 300
         if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
-            self.index += 1
+            self.index = (self.index + 1) % len(self.animationFileMap[self.action])
             self.update_time = pygame.time.get_ticks()
 
     def update_player_action(self, cur_action):
@@ -186,7 +191,7 @@ class Bullet(pygame.sprite.Sprite):
         self.bullet_group = None
         self.player : Soldier = None
         self.enemy = None
-        self.image = pygame.image.load("./assets/golum/PROJECTILE.png")
+        self.image = pygame.image.load("./assets/golum/PROJECTILE.png").convert_alpha()
 
         self.direction = direction
         flipX = False
@@ -239,7 +244,7 @@ class Granade(pygame.sprite.Sprite):
         self.state_image["FLYING"] = [pygame.image.load("./assets/objects/missile.gif").convert()]
         exploding_img_list = []
         for imageItem in sorted(items):
-            img = pygame.image.load(f"./assets/PixelSimulations/Explosion4/{imageItem}").convert()
+            img = pygame.image.load(f"./assets/PixelSimulations/Explosion4/{imageItem}").convert_alpha()
             exploding_img_list.append(img)
         self.state_image["EXPLODING"] = exploding_img_list
         if direction == 1:

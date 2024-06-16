@@ -16,8 +16,3 @@ def clip2(surface, x, y, x_size, y_size): #Get a part of the image
     return image.copy() #Return
 
 
-def renderFont():
-    pass
-    # ft = pygame.font.SysFont('Comic Sans MS', 30)
-    # font_surface = ft.render("hello world", False, (200, 200, 200))
-    # screen.blit(font_surface, (10, 10))
