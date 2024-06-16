@@ -240,7 +240,7 @@ class Granade(pygame.sprite.Sprite):
         self.image = pygame.image.load("./assets/objects/missile.gif")
         self.state_image = {}
         items = os.listdir("./assets/PixelSimulations/Explosion4/")
-        print("ITEMS: " , items)
+        print("ITEMS: ", items)
         self.state_image["FLYING"] = [pygame.image.load("./assets/objects/missile.gif").convert()]
         exploding_img_list = []
         for imageItem in sorted(items):

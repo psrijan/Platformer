@@ -17,7 +17,7 @@ class ItemBox(pygame.sprite.Sprite):
 
 
 
-
-
+    def draw(self, screen):
+        pass
 
 

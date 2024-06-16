@@ -1,5 +1,5 @@
 import pygame.sprite
-from imageutil import clip
+from util import clip
 
 static_data = {
     'FLYING': {

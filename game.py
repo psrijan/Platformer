@@ -2,7 +2,7 @@ import pygame
 from player import Soldier, Bullet, Granade
 import time
 from enemy import Enemy
-from imageutil import clip2
+from util import clip2, generate_bar, generate_coins
 from items import ItemBox, ItemBoxType
 
 SCREEN_WIDTH = 768
@@ -12,7 +12,6 @@ class Level(object):
     def __init__(self, level=1):
         self.cur_level = level
         self.pygame = pygame
-
         self.img_list = []
 
         for i in range(1, 6):
@@ -28,47 +27,7 @@ class Level(object):
                 screen.blit(img, (x * img.get_width() + scroll * speed, 0))
                 speed += .2
 
-
-def generateCoins(imgLoc, startX, startY, count, scale=1):
-    img = pygame.image.load(imgLoc).convert_alpha()
-    img = clip2(img, 0, 0, 20, 20)
-    img = pygame.transform.scale(img, (img.get_width() * scale, img.get_height() * scale))
-    offset = 22 # keeping a default offset of 20px
-    for i in range(0, count):
-        rect = img.get_rect()
-        rect.centerx = startX + offset * i
-        rect.centery = startY
-        screen.blit(img, rect)
-
-def generateBar(imgLoc, startX, startY, amountLeft, totalAmount, bar_type, text='', scale=1):
-    pass
-    # ft = pygame.font.SysFont('Comic Sans MS', 30)
-    # font_surface = ft.render("hello world", False, (200, 200, 200))
-    # screen.blit(font_surface, (10, 10))
-    img = pygame.image.load(imgLoc).convert_alpha()
-    img = pygame.transform.scale(img, (img.get_width() * scale, img.get_height() * scale))
-    img.get_rect()
-
-    print("heart: ", img.get_width(), " - ", img.get_height())
-    img_rect = img.get_rect()
-    img_rect.center = (startX, startY)
-    screen.blit(img, img_rect)
-    width = 100
-    height = 10
-    actual_width = int((amountLeft * width) / totalAmount)
-
-    if bar_type == 'BAR':
-        pygame.draw.rect(screen, "white",  [startX + 14, startY - 2, width + 4, 10 + 4])
-        pygame.draw.rect(screen, "red", [startX + 16, startY, width, height])
-        pygame.draw.rect(screen, "green", [startX + 16, startY, actual_width, height])
-    elif bar_type == 'xTEXT':
-        ft = pygame.font.SysFont('Comic Sans MS', 11)
-        font_surface = ft.render('X {}'.format(text), False, (200, 200, 200))
-        screen.blit(font_surface, (startX + 30, startY))
-
-
 PLAYER_SPEED = 15
-
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
@@ -96,8 +55,11 @@ pygame.draw.rect(screen, "green",[75, 10, 50, 20])
 # bullet group to hold the bullets created by the user
 bullet_group = pygame.sprite.Group()
 granade_group = pygame.sprite.Group()
+item_box_group = pygame.sprite.Group()
 scroll = 1
 hasGameStarted = False
+
+# item_box = ItemBox(200, 300, ItemBoxType.GUN)
 
 while GAME_LOOP_RUNNING:
 
@@ -195,6 +157,7 @@ while GAME_LOOP_RUNNING:
     enemy1.draw(screen)
     bullet_group.draw(screen)
     granade_group.draw(screen)
+    item_box_group.draw(screen)
 
     player.detect_collission(enemy1.rect)
 
@@ -205,11 +168,11 @@ while GAME_LOOP_RUNNING:
     # pygame.draw.rect(screen, "red", [150, 10, 200, 20])
     # pygame.draw.rect(screen, "green", [150, 10, health, 20])
 
-    generateBar('./assets/objects/heart.png', 20, 10, enemy1.health, enemy1.max_heath, 'BAR')
-    generateBar('./assets/objects/missile.gif', 330, 10, player.granade_count,
+    generate_bar(screen, './assets/objects/heart.png', 20, 10, enemy1.health, enemy1.max_heath, 'BAR')
+    generate_bar(screen, './assets/objects/missile.gif', 330, 10, player.granade_count,
                 player.max_granade_count, 'xTEXT', str(player.granade_count))
-    generateBar('./assets/objects/rifle.png', 180, 10, player.ammo, player.max_ammo, .5)
-    generateCoins('./assets/objects/coin.png', 500, 10, 5, 1)
+    generate_bar(screen, './assets/objects/rifle.png', 180, 10, player.ammo, player.max_ammo, .5)
+    generate_coins(screen, './assets/objects/coin.png', 500, 10, 5, 1)
     # ft = pygame.font.SysFont('Comic Sans MS', 30)
     # font_surface = ft.render(f"Health: {player.health}", False, (200, 200, 200))
     # screen.blit(font_surface, (10, 10))
