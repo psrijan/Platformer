@@ -4,6 +4,7 @@ import time
 from enemy import Enemy
 from util import clip2, generate_bar, generate_coins
 from items import ItemBox, ItemBoxType
+from sounds import SoundType, SoundModule
 
 SCREEN_WIDTH = 768
 SCREEN_HEIGHT = 432
@@ -50,7 +51,7 @@ AIM = 'aim'
 
 FPS = 60
 
-pygame.draw.rect(screen, "green",[75, 10, 50, 20])
+pygame.draw.rect(screen, "green", [75, 10, 50, 20])
 
 # bullet group to hold the bullets created by the user
 bullet_group = pygame.sprite.Group()
@@ -59,10 +60,20 @@ item_box_group = pygame.sprite.Group()
 scroll = 1
 hasGameStarted = False
 
-# item_box = ItemBox(200, 300, ItemBoxType.GUN)
+item_box = ItemBox(200, 300, ItemBoxType.GUN)
+item_box1 = ItemBox(300, 300, ItemBoxType.BOMB)
+item_box3 = ItemBox(300, 400, ItemBoxType.HEART)
+item_box4 = ItemBox(320, 300, ItemBoxType.COIN)
+item_box_group.add(item_box)
+item_box_group.add(item_box1)
+item_box_group.add(item_box3)
+#item_box_group.add(item_box4)
+
+sound_module = SoundModule()
+
+
 
 while GAME_LOOP_RUNNING:
-
     clock.tick(FPS)
     key = pygame.key.get_pressed()
     if key[pygame.K_a] and scroll > 0:
@@ -137,10 +148,17 @@ while GAME_LOOP_RUNNING:
     for bullet in bullet_group.sprites():
         bullet.add_hit_strikes(player, enemy1, bullet_group)
 
+    for item in item_box_group.sprites():
+        item.add_player(player, item_box_group)
+
     for granade in granade_group.sprites():
         granade.add_hit_strike(player, enemy1, granade_group)
     bullet_group.update()
     granade_group.update()
+    item_box_group.update()
+
+    # if pygame.sprite.spritecollide(player, bullet_group, False):
+    #     print("colliding")
 
     player.move(move_left, move_right, jump, PLAYER_SPEED)
     enemy.move()

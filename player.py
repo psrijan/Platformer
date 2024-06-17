@@ -3,6 +3,7 @@ import os
 from pygame import Rect
 from pygame.sprite import Group
 from enum import Enum
+from sounds import SoundModule
 
 AIM = 'aim'
 DEATH = 'death'
@@ -11,6 +12,10 @@ RUN = 'run'
 SHOOT = 'shoot'
 
 PLAYER_SPEED = 5
+MAX_GRANADE = 5
+MAX_AMMO = 100
+MAX_COIN = 250
+MAX_HEALTH = 100
 
 
 class Soldier(pygame.sprite.Sprite):
@@ -33,6 +38,7 @@ class Soldier(pygame.sprite.Sprite):
         self.animationFileMap = {}
         self.update_time = pygame.time.get_ticks()
         self.gravity = .75
+        self.coin = 0
 
         self.ammo = ammo
         self.max_ammo = ammo
@@ -42,13 +48,13 @@ class Soldier(pygame.sprite.Sprite):
 
         self.health = health
         self.max_health = health
+        self.sound_module = SoundModule()
 
         for curTag in imgTags:
             fileList = os.listdir(f'assets/player/{curTag}')
-            print(fileList)
             loaded_files = []
             for file_name in fileList:
-                print(f'./assets/player/{curTag}/{file_name}')
+                # print(f'./assets/player/{curTag}/{file_name}')
                 load_img = pygame.image.load(f'assets/player/{curTag}/{file_name}').convert_alpha()
                 loaded_files.append(load_img)
                 self.animationFileMap[curTag] = loaded_files
@@ -65,6 +71,17 @@ class Soldier(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.idle()
+
+    def add_inventory(self, item_type):
+        if item_type == ItemBoxType.GUN:
+            self.ammo += 25
+            self.ammo = min(100, self.ammo)
+        elif item_type == ItemBoxType.BOMB:
+            self.granade_count = min(MAX_GRANADE, self.granade_count + 25)
+        elif item_type == ItemBoxType.HEART:
+            self.health = max(self.health + 25, MAX_HEALTH)
+        elif item_type == ItemBoxType.COIN:
+            self.coin += 1
 
     def idle(self):
         # initialize state to idle if it's not the case and index img to 0
@@ -105,6 +122,7 @@ class Soldier(pygame.sprite.Sprite):
 
     def shoot(self, bullet_group: Group):
         cur_ticks = pygame.time.get_ticks()
+        self.sound_module.shoot()
 
         if cur_ticks - self.shoot_time > self.SHOOT_COOLDOWN_TIME and self.ammo > 0:
             print("player is shooting ")
@@ -119,6 +137,7 @@ class Soldier(pygame.sprite.Sprite):
     def throwGranade(self, granade_group: Group):
         cur_ticks = pygame.time.get_ticks()
         if cur_ticks - self.grande_throw_time > self.GRANDE_COOLDOWN_TIME and self.granade_count > 0:
+            self.sound_module.launch_granade()
             print('throwing grande')
             granade = Granade(self.rect.centerx + (self.rect.width * .6 * self.direction),
                               self.rect.centery, self.direction)
@@ -147,6 +166,7 @@ class Soldier(pygame.sprite.Sprite):
         if isJump:
             self.ySpeed = 11
             self.isJumpActivated = True
+            self.sound_module.jump()
 
         if self.isJumpActivated:
             self.ySpeed = self.ySpeed - self.gravity
@@ -262,6 +282,8 @@ class Granade(pygame.sprite.Sprite):
         self.gravity = .5
         self.bobLeft = True
         self.index = 0
+        self.sound_module = SoundModule()
+        self.is_playing_sound = False
 
     def add_hit_strike(self, player, enemy, granade_group):
         self.player = player
@@ -290,6 +312,9 @@ class Granade(pygame.sprite.Sprite):
         if self.cur_state == "EXPLODING":
             if not self.index == len(self.state_image[self.cur_state]) - 1:
                 self.index = (self.index + 1) % len(self.state_image[self.cur_state])
+                if not self.is_playing_sound:
+                    self.is_playing_sound = True
+                    self.sound_module.explosion()
         else:
             self.index = 0 # flying just use the first index
 
