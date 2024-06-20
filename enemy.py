@@ -30,10 +30,11 @@ static_data = {
         'IMAGE_COORD': [(0, 0), (81, 0), (162, 0), (244, 0), (325, 0), (406, 0), (487, 0), (568, 0)]
     },
 }
+ANIMATION_COOLDOWN = 100
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y, scale, cur_state='IDLE', health=100):
+    def __init__(self, x, y, scale, cur_state='IDLE', health=100, speed=5):
         pygame.sprite.Sprite.__init__(self)
         self.update_time = pygame.time.get_ticks() # identifies when a given action is initiated
         self.rect = None
@@ -49,13 +50,14 @@ class Enemy(pygame.sprite.Sprite):
         self.alive = True
         self.health = health
         self.max_heath = health
+        self.speed = speed# currently used as initial speed for the enemy
 
         self.cur_state = cur_state
         self.state = ['ATTACK', 'DEATH', 'FLYING', 'HURT', 'IDLE']
         if self.cur_state == 'IDLE':
             self.dx = 0
         else:
-            self.dx = 15  # horizontal speed of the golum
+            self.dx = self.speed  # horizontal speed of the golum
         self.dy = 0  # vertical speed of the golum
         self.static_data = static_data
 
@@ -67,10 +69,9 @@ class Enemy(pygame.sprite.Sprite):
 
     def pick_img(self):
         state_img_list = self.img_map[self.cur_state]
-        img_size_length = static_data[self.cur_state]['IMG_COUNT']
         img_size = static_data[self.cur_state]['IMAGE_SIZE'][self.index]
         img_coord = static_data[self.cur_state]['IMAGE_COORD'][self.index]
-        print(f'ENEMY - cur_index {self.index} max_index {img_size_length} img_size {img_size} img_coord {img_coord} ')
+        # print(f'ENEMY - cur_index {self.index} max_index {img_size_length} img_size {img_size} img_coord {img_coord} ')
         self.img = clip(state_img_list, img_coord[0], img_coord[1], img_size[0], img_size[1])
         # self.img = state_img_list
         self.img = pygame.transform.scale(pygame.transform.flip(self.img, self.flip, False),
@@ -82,10 +83,6 @@ class Enemy(pygame.sprite.Sprite):
         img_size_length = static_data[self.cur_state]['IMG_COUNT']
         self.pick_img()
         screen.blit(self.img, self.rect)
-        if self.cur_state == 'DEATH' and self.index >= img_size_length - 1:
-            self.kill()
-        else:
-            self.index = (self.index + 1) % img_size_length
 
     def check_alive(self):
         if self.health <= 0:
@@ -97,10 +94,23 @@ class Enemy(pygame.sprite.Sprite):
         if not self.alive:
             self.update_action('DEATH')
 
+        # bug introduced because of this where in there is endless loop after death
+        # if not self.alive and self.index >= static_data[self.cur_state]['IMG_COUNT']:
+        #     print("killing enemy")
+        #     self.kill()
+        # else:
+        self.update_animation()
+
     def update_action(self, action_name):
         if self.cur_state != action_name:
             self.cur_state = action_name
             self.index = 0
+            self.update_time = pygame.time.get_ticks()
+
+    def update_animation(self):
+        img_size_length = static_data[self.cur_state]['IMG_COUNT']
+        if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
+            self.index = (self.index + 1) % img_size_length
             self.update_time = pygame.time.get_ticks()
 
     def detect_collision(self):

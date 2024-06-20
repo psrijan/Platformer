@@ -28,7 +28,7 @@ class Level(object):
                 screen.blit(img, (x * img.get_width() + scroll * speed, 0))
                 speed += .2
 
-PLAYER_SPEED = 15
+PLAYER_SPEED = 5
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
@@ -70,8 +70,6 @@ item_box_group.add(item_box3)
 #item_box_group.add(item_box4)
 
 sound_module = SoundModule()
-
-
 
 while GAME_LOOP_RUNNING:
     clock.tick(FPS)
@@ -157,7 +155,7 @@ while GAME_LOOP_RUNNING:
 
     # if pygame.sprite.spritecollide(player, bullet_group, False):
     #     print("colliding")
-
+    player.update_animation()  # this cannot be inside an event loop.
     enemy.move()
     enemy1.move()
     enemy1.update()
@@ -197,6 +195,5 @@ while GAME_LOOP_RUNNING:
 
     # pygame.draw.rect(screen, pygame.Color(100,100,100, 100), pygame.rect.Rect(100, 100, 100, 100))
     pygame.display.flip()
-    pygame.time.delay(150)  # @todo check if this is a way to delay frame rate in python.
 
 pygame.quit()
