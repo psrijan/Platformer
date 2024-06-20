@@ -1,6 +1,8 @@
 import pygame.sprite
 from util import clip
 
+# the image i am using is a continuous frame of action in one single image. () () () () ()
+# So this static data gives which state has how many images, and which pixel it starts from
 static_data = {
     'FLYING': {
         'IMG_COUNT': 4,
@@ -61,18 +63,24 @@ class Enemy(pygame.sprite.Sprite):
             img_surface = pygame.image.load('./assets/golum/{}.png'.format(cur_state))
             self.img_map[cur_state] = img_surface
 
-    def draw(self, screen):
+        self.pick_img() # first time around doesn't increase counter. Could it cause side effects?
+
+    def pick_img(self):
         state_img_list = self.img_map[self.cur_state]
         img_size_length = static_data[self.cur_state]['IMG_COUNT']
         img_size = static_data[self.cur_state]['IMAGE_SIZE'][self.index]
         img_coord = static_data[self.cur_state]['IMAGE_COORD'][self.index]
         print(f'ENEMY - cur_index {self.index} max_index {img_size_length} img_size {img_size} img_coord {img_coord} ')
-        self.img = clip(state_img_list, img_coord[0], img_coord[1],img_size[0], img_size[1])
+        self.img = clip(state_img_list, img_coord[0], img_coord[1], img_size[0], img_size[1])
         # self.img = state_img_list
         self.img = pygame.transform.scale(pygame.transform.flip(self.img, self.flip, False),
                                           (self.img.get_width() * self.scale, self.img.get_height() * self.scale))
         self.rect = self.img.get_rect()
         self.rect.center = (self.x, self.y)
+
+    def draw(self, screen):
+        img_size_length = static_data[self.cur_state]['IMG_COUNT']
+        self.pick_img()
         screen.blit(self.img, self.rect)
         if self.cur_state == 'DEATH' and self.index >= img_size_length - 1:
             self.kill()
@@ -83,7 +91,6 @@ class Enemy(pygame.sprite.Sprite):
         if self.health <= 0:
             self.health = 0
             self.alive = False
-        print(f"current enemy health: {self.health}")
 
     def update(self):
         self.check_alive()

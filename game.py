@@ -35,7 +35,7 @@ clock = pygame.time.Clock()
 GAME_LOOP_RUNNING = True
 player = Soldier(700, 300, .25)
 enemy = Enemy(300, 400, 1, 'FLYING')
-enemy1 = Enemy(500, 300, 1)
+enemy1 = Enemy(200, 200, 1)
 
 move_left = False
 move_right = False
@@ -82,8 +82,6 @@ while GAME_LOOP_RUNNING:
         scroll += 5
 
     scroll = 0 # remove for parallex after fixing the player issue
-
-    print("SCROLL: ", scroll)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -160,24 +158,26 @@ while GAME_LOOP_RUNNING:
     # if pygame.sprite.spritecollide(player, bullet_group, False):
     #     print("colliding")
 
-    player.move(move_left, move_right, jump, PLAYER_SPEED)
     enemy.move()
     enemy1.move()
     enemy1.update()
 
+    player.move(move_left, move_right, jump, PLAYER_SPEED, enemy1.rect)
     screen.fill((0, 0, 0))
+    pygame.draw.line(screen, (255, 255, 0), (10, 350), (900, 350), 5)
     # level = Level()
     # print("scroll:", scroll)
     # level.createLevel("one", scroll)
 
     player.draw(screen)
     # enemy.draw(screen)
-    enemy1.draw(screen)
     bullet_group.draw(screen)
     granade_group.draw(screen)
     item_box_group.draw(screen)
 
-    player.detect_collission(enemy1.rect)
+    enemy1.draw(screen)
+
+    #player.detect_collission(enemy1.rect)
 
     # player.move(move_left, move_right, 5)
 

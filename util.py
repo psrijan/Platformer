@@ -36,7 +36,6 @@ def generate_bar(screen, imgLoc, startX, startY, amountLeft, totalAmount, bar_ty
     img = pygame.transform.scale(img, (img.get_width() * scale, img.get_height() * scale))
     img.get_rect()
 
-    print("heart: ", img.get_width(), " - ", img.get_height())
     img_rect = img.get_rect()
     img_rect.center = (startX, startY)
     screen.blit(img, img_rect)

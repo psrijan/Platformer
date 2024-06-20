@@ -37,7 +37,6 @@ class SoundModule:
     def __init__(self):
         self.sound_dict = {}
         sounds = os.listdir("./assets/sounds/")
-        print(f"sounds {sounds}")
 
         for sound_name in sounds:
             loaded_sound = pygame.mixer.Sound(f"./assets/sounds/{sound_name}")
@@ -46,7 +45,7 @@ class SoundModule:
                 label = SoundType.from_str(name)
                 self.sound_dict[label] = loaded_sound
             except Exception:
-                print("No label found")
+                print("No sound label found")
 
     def shoot(self, vol=.5) :
         sound = self.sound_dict[SoundType.SHOT]
