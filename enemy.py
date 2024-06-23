@@ -2,7 +2,7 @@ import pygame.sprite
 from util import clip
 
 # the image i am using is a continuous frame of action in one single image. () () () () ()
-# So this static data gives which state has how many images, and which pixel it starts from
+# So this static data gives which state has how many images, and which apixel it starts from
 static_data = {
     'FLYING': {
         'IMG_COUNT': 4,

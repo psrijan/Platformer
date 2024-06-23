@@ -139,7 +139,7 @@ while GAME_LOOP_RUNNING:
         # bullet_group.add(bullet)
 
     if granade_throw:
-        player.throwGranade(granade_group)
+        player.throw_granade(granade_group)
 
     for bullet in bullet_group.sprites():
         bullet.add_hit_strikes(player, enemy1, bullet_group)
@@ -151,7 +151,6 @@ while GAME_LOOP_RUNNING:
         granade.add_hit_strike(player, enemy1, granade_group)
     bullet_group.update()
     granade_group.update()
-    item_box_group.update()
 
     # if pygame.sprite.spritecollide(player, bullet_group, False):
     #     print("colliding")
@@ -168,6 +167,7 @@ while GAME_LOOP_RUNNING:
     # level.createLevel("one", scroll)
 
     player.draw(screen)
+    item_box_group.update()
     # enemy.draw(screen)
     bullet_group.draw(screen)
     granade_group.draw(screen)

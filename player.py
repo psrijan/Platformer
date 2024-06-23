@@ -1,3 +1,5 @@
+import enum
+
 import pygame
 import os
 from pygame import Rect
@@ -21,6 +23,7 @@ MAX_HEALTH = 100
 RIGHT = 1
 LEFT = -1
 TERMINAL_VELOCITY = 10
+INITIAL_Y_SPEED = -10
 
 
 class Soldier(pygame.sprite.Sprite):
@@ -76,7 +79,9 @@ class Soldier(pygame.sprite.Sprite):
         self.index = 0
         self.x = x
         self.y = y
+        self.jump_count = 0
         self.idle()
+        self.pick_img()
 
     def add_inventory(self, item_type):
         if item_type == ItemBoxType.GUN:
@@ -94,15 +99,8 @@ class Soldier(pygame.sprite.Sprite):
         if self.action not in IDLE:
             self.action = IDLE
             self.index = 0
-        print('State: {} Index: {} Total Size: {} '.format(self.action, self.index,
-                                                           len(self.animationFileMap[self.action])))
-        self.img = self.animationFileMap[self.action][self.index]
-        self.img = pygame.transform.scale(self.img, (
-            int(self.img.get_width() * self.scale), int(self.img.get_height() * self.scale)))
-        # self.index = (self.index + 1) % len(self.animationFileMap[self.action])
 
-    def draw(self, screen):
-
+    def pick_img(self):
         # AIM needs to iterate through two different set of image set for animation
         if self.action == 'aim':
             if self.aim_major_loop and self.index == 0:
@@ -110,7 +108,7 @@ class Soldier(pygame.sprite.Sprite):
                 self.index = self.index % len(self.animationFileMap[self.action])
             elif self.index > 3 and not self.aim_major_loop:
                 self.aim_major_loop = True
-        print("index in draw for player:" , str(self.index))
+        print("index in draw for player:", str(self.index))
         self.img = self.animationFileMap[self.action][self.index]
         self.img = pygame.transform.scale(pygame.transform.flip(self.img, self.flip, False),
                                           (int(self.img.get_width() * self.scale),
@@ -118,9 +116,10 @@ class Soldier(pygame.sprite.Sprite):
         # self.index = (self.index + 1) % len(self.animationFileMap[self.action])
         self.rect = self.img.get_rect()
         self.rect.center = (self.x, self.y)
-        screen.blit(self.img, self.rect)
 
-    ySpeed = 11
+    def draw(self, screen):
+        self.pick_img()
+        screen.blit(self.img, self.rect)
 
     def shoot(self, bullet_group: Group):
         cur_ticks = pygame.time.get_ticks()
@@ -136,7 +135,7 @@ class Soldier(pygame.sprite.Sprite):
         else:
             print("player ammo empty or shoot time not exceeded ")
 
-    def throwGranade(self, granade_group: Group):
+    def throw_granade(self, granade_group: Group):
         cur_ticks = pygame.time.get_ticks()
         if cur_ticks - self.grande_throw_time > self.GRANDE_COOLDOWN_TIME and self.granade_count > 0:
             self.sound_module.launch_granade()
@@ -155,6 +154,8 @@ class Soldier(pygame.sprite.Sprite):
     def move(self, move_left, move_right, isJump, speed, enemy):
         dx = 0
 
+        print("jump count: " + str(self.jump_count))
+
         if move_left:
             self.direction = LEFT
             dx = -speed
@@ -164,11 +165,12 @@ class Soldier(pygame.sprite.Sprite):
             dx = speed
             self.flip = False
 
-        INITIAL_Y_SPEED = -10
-        if isJump:
+        # maybe need to have some sort of debounce
+        if isJump and self.jump_count < 2:
             self.ySpeed = INITIAL_Y_SPEED
             self.isJumpActivated = True
             self.sound_module.jump()
+            self.jump_count += 1
 
         if self.isJumpActivated:
             self.ySpeed = self.ySpeed + self.gravity
@@ -177,6 +179,7 @@ class Soldier(pygame.sprite.Sprite):
                 self.ySpeed = TERMINAL_VELOCITY  # terminal velocity (10)
         else:
             dy = 0
+            self.jump_count = 0
 
         check_x_collission = self.detect_x_collission(self.x, dx, self.direction, enemy)
         check_y_collission = self.detect_y_collission(self.y, dy, 0)
@@ -289,6 +292,9 @@ class Bullet(pygame.sprite.Sprite):
                 self.kill()
                 self.enemy.health -= 25
 
+class GranadeState(enum.Enum):
+    EXPLODING = "EXPLODING"
+    FLYING = "FLYING"
 
 class Granade(pygame.sprite.Sprite):
     def __init__(self, x, y, direction):
@@ -344,9 +350,9 @@ class Granade(pygame.sprite.Sprite):
             self.image = pygame.transform.rotate(self.image, +.2)
         self.bobLeft = not self.bobLeft
 
-        if pygame.time.get_ticks() - self.start_time >= 3000 and self.cur_state is not "EXPLODING":
+        if pygame.time.get_ticks() - self.start_time >= 3000 and self.cur_state != GranadeState.EXPLODING.value:
             print("bomb time elapsed")
-            self.cur_state = "EXPLODING"
+            self.cur_state = GranadeState.EXPLODING.value
             self.index = 0
 
         if self.cur_state == "EXPLODING":

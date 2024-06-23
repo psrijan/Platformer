@@ -28,22 +28,13 @@ class ItemBox(pygame.sprite.Sprite):
         self.item_group = None
 
     def add_player(self, player, item_group):
+        print('adding player in item box')
         self.player = player
         self.item_group = item_group
 
     def update(self):
-
-        # if self.scale > self.MIN_SCALE_VALUE and self.scale_dir == - 1 or self.scale < self.MAX_SCALE_VALUE and self.scale_dir == 1:
-        #     self.scale = self.scale + .02 * self.scale_dir
-        # elif self.scale < self.MIN_SCALE_VALUE:
-        #     self.scale = self.MIN_SCALE_VALUE + .02
-        #     self.scale_dir = self.scale_dir * -1
-        # else:
-        #     self.scale = self.MAX_SCALE_VALUE - .02
-        #     self.scale_dir = self.scale_dir * -1
-        #     print(f"Changing Scale Direction: scale : {self.scale}  direction -  {self.scale_dir}")
-        # self.image = pygame.transform.scale(self.image, (self.original_size[0] * self.scale, self.original_size[1] * self.scale))
-
-        # print("updating item box")
-        pass
+        print("player is none in update :" + str(self.player.rect is None))
+        if pygame.sprite.collide_rect(self.player, self):
+            self.player.add_inventory(self.item_type)
+            self.kill()
 
