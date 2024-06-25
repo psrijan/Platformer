@@ -157,6 +157,7 @@ while GAME_LOOP_RUNNING:
     granade_group.draw(screen)
     item_box_group.draw(screen)
 
+
     enemy1.draw(screen)
 
     #player.detect_collission(enemy1.rect)
