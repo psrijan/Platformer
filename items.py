@@ -1,11 +1,13 @@
 import pygame.sprite
 from enum import Enum
 
+
 class ItemBoxType(Enum):
     GUN = "rifle"
     BOMB = "missile"
     COIN = "coin"
     HEART = "heart"
+
 
 class ItemBox(pygame.sprite.Sprite):
     def __init__(self, x, y, item_type):
@@ -16,7 +18,8 @@ class ItemBox(pygame.sprite.Sprite):
         self.img_dict = {}
         self.scale = 1
         self.image = pygame.image.load(f"./assets/itembox/{self.item_type.value}.png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, (self.image.get_width() * self.scale, self.image.get_height() * self.scale))
+        self.image = pygame.transform.scale(self.image,
+                                            (self.image.get_width() * self.scale, self.image.get_height() * self.scale))
         self.original_size = (self.image.get_width(), self.image.get_height())
 
         self.rect = self.image.get_rect()
@@ -38,3 +41,34 @@ class ItemBox(pygame.sprite.Sprite):
             self.player.add_inventory(self.item_type)
             self.kill()
 
+
+class Obstacle(pygame.sprite.Sprite):
+
+    def __init__(self, img, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(f'./assets/level_data/mapping/{img}.png').convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
+
+class Decoration(pygame.sprite.Sprite):
+
+    def __init__(self, img,x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.x = x
+        self.y = y
+        self.image = pygame.image.load(f'./assets/level_data/mapping/{img}.png').convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
+
+class Water(pygame.sprite.Sprite):
+
+    def __init__(self, img, x, y):
+
+        pygame.sprite.Sprite.__init__(self)
+        self.x = x
+        self.y = y
+        self.image = pygame.image.load(f'./assets/level_data/mapping/{img}.png').convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)

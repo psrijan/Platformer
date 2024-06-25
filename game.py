@@ -5,35 +5,22 @@ from enemy import Enemy
 from util import clip2, generate_bar, generate_coins
 from items import ItemBox, ItemBoxType
 from sounds import SoundType, SoundModule
+from state import  GameState
+import csv
+from levels import Level
+
 
 SCREEN_WIDTH = 768
-SCREEN_HEIGHT = 432
-
-class Level(object):
-    def __init__(self, level=1):
-        self.cur_level = level
-        self.pygame = pygame
-        self.img_list = []
-
-        for i in range(1, 6):
-            img = pygame.image.load(f"./assets/levels/one/plx-{i}.png").convert_alpha()
-            self.img_list.append(img)
-    def createLevel(self, level, scroll):
-        #screen.blit((0,0,0))
-        speed = 1
-        for x in range(0, 4):
-            for i in range (0, len(self.img_list)):
-                img = self.img_list[i]
-                img = self.img_list[i]
-                screen.blit(img, (x * img.get_width() + scroll * speed, 0))
-                speed += .2
+SCREEN_HEIGHT = 700
+ROWS = 16
+COLUMNS = 150
+BLOCK_PIXEL = 32 # considering each block is 32 pixel
 
 PLAYER_SPEED = 5
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 GAME_LOOP_RUNNING = True
-player = Soldier(700, 300, .25)
 enemy = Enemy(300, 400, 1, 'FLYING')
 enemy1 = Enemy(200, 200, 1)
 
@@ -50,36 +37,30 @@ SHOOT = 'shoot'
 AIM = 'aim'
 
 FPS = 60
-
 pygame.draw.rect(screen, "green", [75, 10, 50, 20])
-
-# bullet group to hold the bullets created by the user
-bullet_group = pygame.sprite.Group()
-granade_group = pygame.sprite.Group()
-item_box_group = pygame.sprite.Group()
 scroll = 1
 hasGameStarted = False
+state = GameState()
 
-item_box = ItemBox(200, 300, ItemBoxType.GUN)
-item_box1 = ItemBox(300, 300, ItemBoxType.BOMB)
-item_box3 = ItemBox(300, 400, ItemBoxType.HEART)
-item_box4 = ItemBox(320, 300, ItemBoxType.COIN)
-item_box_group.add(item_box)
-item_box_group.add(item_box1)
-item_box_group.add(item_box3)
-#item_box_group.add(item_box4)
+item_box_group = state.item_box_group
+bullet_group = state.bullet_group
+granade_group = state.granade_group
 
+scroll = 0
+level = Level()
+level_data = level.load_level_data(0)
+player = level.process_level_data(level_data, state)
 sound_module = SoundModule()
 
 while GAME_LOOP_RUNNING:
     clock.tick(FPS)
     key = pygame.key.get_pressed()
-    if key[pygame.K_a] and scroll > 0:
-        scroll -= 5
-    if key[pygame.K_d] and scroll < 3000:
+    if key[pygame.K_a] and scroll < 3000:
         scroll += 5
+    if key[pygame.K_d] and scroll > 0:
+        scroll -= 5
 
-    scroll = 0 # remove for parallex after fixing the player issue
+    print(f"Scroll: {scroll}")
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -160,11 +141,14 @@ while GAME_LOOP_RUNNING:
     enemy1.update()
 
     player.move(move_left, move_right, jump, PLAYER_SPEED, enemy1.rect)
-    screen.fill((0, 0, 0))
+    # Draw all the group entities that are created
+    level.refresh_screen(screen, state)
+    #screen.fill((0, 0, 0))
+    level.create_background(1, scroll)
     pygame.draw.line(screen, (255, 255, 0), (10, 350), (900, 350), 5)
-    # level = Level()
+    # level_data = Level()
     # print("scroll:", scroll)
-    # level.createLevel("one", scroll)
+    # level_data.createLevel("one", scroll)
 
     player.draw(screen)
     item_box_group.update()
