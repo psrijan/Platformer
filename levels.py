@@ -69,7 +69,7 @@ class Level(object):
                     water_group.add(water)
                 elif val == TileType.PLAYER.value:
                     print('creating player ')
-                    player = Soldier(i * self.row_size, j * self.col_size, .25)
+                    player = Soldier(i * self.row_size, j * self.col_size, .25, state)
                 elif val == TileType.PLAYER.value:
                     decoration = Decoration(str(val), j * self.row_size, i * self.row_size)
                     decoration_group.add(decoration)

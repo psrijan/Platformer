@@ -8,6 +8,7 @@ from enum import Enum
 from sounds import SoundModule
 from items import ItemBox, ItemBoxType
 
+
 AIM = 'aim'
 DEATH = 'death'
 IDLE = 'idle'
@@ -26,10 +27,10 @@ TERMINAL_VELOCITY = 10
 INITIAL_Y_SPEED = -10
 
 
-class Soldier(pygame.sprite.Sprite):
-    dy = 0
 
-    def __init__(self, x, y, scale, speed=10, ammo=10, health=90, granade=5):
+class Soldier(pygame.sprite.Sprite):
+
+    def __init__(self, x, y, scale, state=None, speed=10, ammo=10, health=90, granade=5):
         pygame.sprite.Sprite.__init__(self)  # i don't quite understand this
         self.shoot_time = 0  # Putting a 50 millisecond shoot cool downt time
         self.grande_throw_time = 0
@@ -58,6 +59,7 @@ class Soldier(pygame.sprite.Sprite):
         self.health = health
         self.max_health = health
         self.sound_module = SoundModule()
+        self.state = state
 
         for curTag in imgTags:
             fileList = os.listdir(f'assets/player/{curTag}')
@@ -79,6 +81,8 @@ class Soldier(pygame.sprite.Sprite):
         self.index = 0
         self.x = x
         self.y = y
+        self.dy = 0
+        self.dx = 0
         self.jump_count = 0
         self.idle()
         self.pick_img()
@@ -152,71 +156,71 @@ class Soldier(pygame.sprite.Sprite):
         self.update_player_action(action)
 
     def move(self, move_left, move_right, isJump, speed, enemy):
-        dx = 0
-
-        print("jump count: " + str(self.jump_count))
-
         if move_left:
             self.direction = LEFT
-            dx = -speed
+            direction_x = LEFT
+            self.dx = -speed # left is negative
             self.flip = True
         elif move_right:
             self.direction = RIGHT
-            dx = speed
+            direction_x = RIGHT
+            self.dx = speed # right is positive
             self.flip = False
+        else:
+            direction_x = IDLE
+            self.dx = 0
 
         # maybe need to have some sort of debounce
-        if isJump and self.jump_count < 2:
-            self.ySpeed = INITIAL_Y_SPEED
+        if isJump and self.jump_count < 10:
+            self.dy = INITIAL_Y_SPEED
             self.isJumpActivated = True
             self.sound_module.jump()
             self.jump_count += 1
-
-        if self.isJumpActivated:
-            self.ySpeed = self.ySpeed + self.gravity
-            dy = self.ySpeed
-            if self.ySpeed > TERMINAL_VELOCITY:
-                self.ySpeed = TERMINAL_VELOCITY  # terminal velocity (10)
+            print("jump activated")
         else:
-            dy = 0
-            self.jump_count = 0
+            self.dy = self.dy + self.gravity
+            if self.dy > TERMINAL_VELOCITY:
+                self.dy = TERMINAL_VELOCITY  # terminal velocity (10)
 
-        check_x_collission = self.detect_x_collission(self.x, dx, self.direction, enemy)
-        check_y_collission = self.detect_y_collission(self.y, dy, 0)
+        direction_y = "DOWN"
+        if self.dy < 0:
+            direction_y = "UP"
 
-        if check_y_collission[0]:
-            self.ySpeed = 0
-            self.isJumpActivated = False
+        print(f"speed y - {self.dy}")
+        for element in self.state.obstacle_group:
+            is_collided_y = element.rect.colliderect((self.x, self.y + self.dy, self.rect.width, self.rect.height))
+            if is_collided_y and direction_y == "DOWN":
+                self.dy = element.rect.top - self.rect.bottom - 5
+                self.jump_count = 0
+                print("collided - down")
+            elif is_collided_y and direction_y == "UP":
+                print("collided - up")
+                self.dy = element.rect.bottom - self.rect.top + 5
 
-        self.x = check_x_collission[1]
-        self.y = check_y_collission[1]
+            is_collided_x = element.rect.colliderect(self.x + self.dx, self.y, self.rect.width, self.rect.height)
+            if is_collided_x and direction_x == RIGHT:
+                self.dx = element.rect.right - self.rect.left + 2
+            elif is_collided_x and direction_x == LEFT:
+                self.dx = element.rect.left - self.rect.right - 2
 
-    def detect_x_collission(self, cur_x, dx, direction, rect: Rect):
-        next_x_pos = cur_x + dx
-        # checking if next_x_pos is inside the coordinate, return co-ordinate between LEFT and RIGHT VARRIES, check logic should be the same
+        self.y = self.y + self.dy
+        self.x = self.x + self.dx
 
-        is_collided = next_x_pos >= rect.centerx - rect.width // 2 and next_x_pos <= rect.centerx + rect.width // 2
-        if not is_collided:
-            return (False, cur_x + dx)
-
-        if direction == LEFT:
-            print('collided: left')
-            return (True, rect.centerx + rect.width // 2 + 2)
-        # checking if next_x position falls inside the coordinates of th rectangle
-        else:
-            print('collided: left')
-            return (True, rect.centerx - rect.width // 2 - 2)
-
-    def detect_y_collission(self, cur_y, dy, direction):
-        TEMP_EARTH_LOCATION = 350
-        next_y_pos = cur_y + dy
-
-        is_collided = next_y_pos + self.img.get_rect().height // 2 > TEMP_EARTH_LOCATION  # current base
-
-        if is_collided:
-            return (True, 350 - self.img.get_rect().height // 2)
-        else:
-            return (False, next_y_pos)
+    # def detect_x_collission(self, cur_x, dx, direction, rect: Rect):
+    #     next_x_pos = cur_x + dx
+    #     # checking if next_x_pos is inside the coordinate, return co-ordinate between LEFT and RIGHT VARRIES, check logic should be the same
+    #
+    #     is_collided = next_x_pos >= rect.centerx - rect.width // 2 and next_x_pos <= rect.centerx + rect.width // 2
+    #     if not is_collided:
+    #         return (False, cur_x + dx)
+    #
+    #     if direction == LEFT:
+    #         print('collided: left')
+    #         return (True, rect.centerx + rect.width // 2 + 2)
+    #     # checking if next_x position falls inside the coordinates of th rectangle
+    #     else:
+    #         print('collided: left')
+    #         return (True, rect.centerx - rect.width // 2 - 2)
 
     # rect collide list would result in identifying the list of elements
     # pygame rect would collide with so any thing that you think it would collide to
